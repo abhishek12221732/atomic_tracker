@@ -1,61 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'task_provider.dart';
+import 'day_view.dart';
+import 'task_view.dart';
+import 'add_task_widget.dart';
+import 'task.dart';
+import 'task_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Mock habit data
-  final List<Map<String, dynamic>> _habits = [
-    {"name": "Morning Jog", "progress": 3, "goal": 7},
-    {"name": "Read Book", "progress": 5, "goal": 10},
-    {"name": "Meditate", "progress": 2, "goal": 5},
-  ];
+  DateTime _selectedDay = DateTime.now(); // Keep track of the selected day
 
   @override
   Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Habit Tracker'),
+        title: const Text('Habit Tracker'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: _habits.length,
-          itemBuilder: (context, index) {
-            final habit = _habits[index];
-            return Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                title: Text(habit["name"]),
-                subtitle: Text(
-                  "Progress: ${habit["progress"]}/${habit["goal"]}",
-                ),
-                trailing: Icon(
-                  habit["progress"] >= habit["goal"]
-                      ? Icons.check_circle
-                      : Icons.circle,
-                  color: habit["progress"] >= habit["goal"]
-                      ? Colors.green
-                      : Colors.grey,
-                ),
-              ),
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          // DayView widget
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DayView(
+              onDaySelected: (day) {
+                setState(() {
+                  _selectedDay = day; // Update the selected day
+                });
+                taskProvider.loadTasks(); // Refresh tasks if needed
+              },
+            ),
+          ),
+          // TaskView widget displaying the task list
+          Expanded(
+            child: TaskView(
+              tasks: taskProvider.tasksForDay(_selectedDay), // Filtered tasks
+              onTaskClicked: (task) async {
+                // Navigate to TaskDetailScreen and handle updates
+                final updatedTask = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TaskDetailScreen(task: task),
+                  ),
+                );
+
+                if (updatedTask != null) {
+                  taskProvider.updateTask(updatedTask);
+                }
+              },
+              onTaskCompleted: (task, isCompleted) {
+                // Update task completion status
+                final updatedTask = task.copyWith(completed: isCompleted);
+                taskProvider.updateTask(updatedTask);
+              },
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to Add Habit Page
-        },
-        tooltip: "Add Habit",
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: AddTaskWidget(),
     );
   }
 }
