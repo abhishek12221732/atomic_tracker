@@ -63,6 +63,22 @@ class Task {
     return days;
   }
 
+  /// Converts a binary representation to a list of booleans
+  static List<bool> binaryToBooleanList(int binary) {
+    return List.generate(7, (index) => (binary & (1 << index)) != 0);
+  }
+
+  /// Converts a list of booleans to binary representation
+  static int booleanListToBinary(List<bool> boolList) {
+    int binary = 0;
+    for (int i = 0; i < boolList.length; i++) {
+      if (boolList[i]) {
+        binary |= (1 << i); // Set the bit for true values
+      }
+    }
+    return binary;
+  }
+
   /// Clears a task by returning a new, empty instance
   Task clear() {
     return Task(
@@ -82,7 +98,8 @@ class Task {
   }
 
   /// Adds multiple tasks to a database
-  static Future<void> addAllToDatabase(DatabaseHelper dbHelper, List<Task> tasks) async {
+  static Future<void> addAllToDatabase(
+      DatabaseHelper dbHelper, List<Task> tasks) async {
     final db = await dbHelper.database;
     for (final task in tasks) {
       await db.insert('tasks', task.toMap());

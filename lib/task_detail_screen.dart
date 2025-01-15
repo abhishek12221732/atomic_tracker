@@ -23,45 +23,31 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void initState() {
   super.initState();
-  _name = widget.task.name ?? '';
-  _description = widget.task.description ?? '';
-  _priority = widget.task.priority ?? 'Low';
-  _startDate = widget.task.startDate ?? DateTime.now();
-  
-  // Fix: Ensure that the list size is exactly 7, and map List<int> to List<bool>
-  _selectedDays = Task.binaryToDays(widget.task.selectedDays ?? 0)
-      .map((day) => day == 1) // Convert 1 to true, 0 to false
-      .toList();
-  
-  // If binaryToDays returns a smaller list, fill the rest with false
-  if (_selectedDays.length < 7) {
-    _selectedDays.addAll(List.generate(7 - _selectedDays.length, (index) => false));
-  }
+  _name = widget.task.name;
+  _description = widget.task.description;
+  _priority = widget.task.priority;
+  _startDate = widget.task.startDate;
 
-  // If binaryToDays is empty, default to all false
-  if (_selectedDays.isEmpty) {
-    _selectedDays = List.generate(7, (index) => false);
-  }
+  // Use binaryToBooleanList for correct initialization
+  _selectedDays = Task.binaryToBooleanList(widget.task.selectedDays);
+  print('Initialized selectedDays (boolean): $_selectedDays');
 }
 
   void _updateTask(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      final updatedTask = Task(
-        id: widget.task.id,
-        name: _name,
-        description: _description,
-        priority: _priority,
-        completed: widget.task.completed,
-        startDate: _startDate,
-        selectedDays: Task.daysToBinary(
-          List.generate(7, (index) => index).where((i) => _selectedDays[i]).toList(),
-        ),
-      );
-      Provider.of<TaskProvider>(context, listen: false).updateTask(updatedTask);
-      Navigator.of(context).pop();
-    }
+  if (_formKey.currentState!.validate()) {
+    _formKey.currentState!.save();
+    final updatedTask = widget.task.copyWith(
+      name: _name,
+      description: _description,
+      priority: _priority,
+      startDate: _startDate,
+      selectedDays: Task.booleanListToBinary(_selectedDays),
+    );
+    Provider.of<TaskProvider>(context, listen: false).updateTask(updatedTask);
+    Navigator.of(context).pop();
   }
+}
+
 
   void _deleteTask(BuildContext context) {
     if (widget.task.id != null) {
