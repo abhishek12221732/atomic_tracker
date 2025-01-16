@@ -44,6 +44,9 @@ class _HomePageState extends State<HomePage> {
               tasks: taskProvider.tasksForDay(_selectedDay), // Filtered tasks
               onTaskClicked: (task) async {
                 // Navigate to TaskDetailScreen and handle updates
+                print('Binary Representation: ${task.selectedDays}');
+                print('Converted Days: ${Task.binaryToDays(task.selectedDays)}');
+
                 final updatedTask = await Navigator.push(
                   context,
                   MaterialPageRoute(

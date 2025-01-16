@@ -52,6 +52,13 @@ class _AddTaskWidgetState extends State<AddTaskWidget> {
     }
   }
 
+  // Toggle all days
+  void _toggleSelectAll(bool selectAll) {
+    setState(() {
+      _selectedDays = List.filled(7, selectAll);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
@@ -117,6 +124,16 @@ class _AddTaskWidgetState extends State<AddTaskWidget> {
                               ),
                             ],
                           ),
+                          // Select All Checkbox
+                          CheckboxListTile(
+                            title: const Text("Select All Days"),
+                            value: _selectedDays.every((day) => day), // Check if all are selected
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _toggleSelectAll(value ?? false);
+                              });
+                            },
+                          ),
                           Wrap(
                             spacing: 10,
                             children: List.generate(7, (index) {
@@ -126,7 +143,7 @@ class _AddTaskWidgetState extends State<AddTaskWidget> {
                                 selected: _selectedDays[index],
                                 onSelected: (isSelected) {
                                   setState(() {
-                                    _selectedDays[index] = !_selectedDays[index];
+                                    _selectedDays[index] = isSelected;
                                   });
                                 },
                               );
