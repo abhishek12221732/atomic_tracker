@@ -1,4 +1,5 @@
-import 'database_helper.dart';
+import 'package:flutter/material.dart'; // For TimeOfDay if needed
+import 'database_helper.dart';  // Import your DatabaseHelper class here
 
 class Task {
   final int? id;
@@ -6,7 +7,7 @@ class Task {
   final String description;
   final bool completed;
   final String priority;
-  final DateTime startDate;
+  final DateTime startDate; // DateTime includes both date and time
   final int selectedDays; // Binary representation for days of the week
 
   Task({
@@ -15,10 +16,11 @@ class Task {
     required this.description,
     required this.completed,
     required this.priority,
-    required this.startDate,
+    required this.startDate, // DateTime for both date and time
     required this.selectedDays,
   });
 
+  // Convert task to a Map for storing in a database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -26,11 +28,12 @@ class Task {
       'description': description,
       'completed': completed ? 1 : 0,
       'priority': priority,
-      'startDate': startDate.toIso8601String(),
+      'startDate': startDate.toIso8601String(), // Save the full DateTime
       'selectedDays': selectedDays,
     };
   }
 
+  // Create a Task instance from a Map (usually from a database)
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
       id: map['id'],
@@ -38,12 +41,12 @@ class Task {
       description: map['description'],
       completed: map['completed'] == 1,
       priority: map['priority'],
-      startDate: DateTime.parse(map['startDate']),
+      startDate: DateTime.parse(map['startDate']), // Parse the full DateTime
       selectedDays: map['selectedDays'],
     );
   }
 
-  /// Converts a list of selected days to binary representation
+  // Converts a list of selected days to binary representation
   static int daysToBinary(List<int> days) {
     int binary = 0;
     for (int day in days) {
@@ -52,7 +55,7 @@ class Task {
     return binary;
   }
 
-  /// Converts binary representation back to a list of selected days
+  // Converts binary representation back to a list of selected days
   static List<int> binaryToDays(int binary) {
     List<int> days = [];
     for (int i = 0; i < 7; i++) {
@@ -63,12 +66,12 @@ class Task {
     return days;
   }
 
-  /// Converts a binary representation to a list of booleans
+  // Converts a binary representation to a list of booleans
   static List<bool> binaryToBooleanList(int binary) {
     return List.generate(7, (index) => (binary & (1 << index)) != 0);
   }
 
-  /// Converts a list of booleans to binary representation
+  // Converts a list of booleans to binary representation
   static int booleanListToBinary(List<bool> boolList) {
     int binary = 0;
     for (int i = 0; i < boolList.length; i++) {
@@ -79,7 +82,7 @@ class Task {
     return binary;
   }
 
-  /// Clears a task by returning a new, empty instance
+  // Clears a task by returning a new, empty instance
   Task clear() {
     return Task(
       id: null,
@@ -87,17 +90,17 @@ class Task {
       description: '',
       completed: false,
       priority: 'Low',
-      startDate: DateTime.now(),
+      startDate: DateTime.now(), // Set current time for new task
       selectedDays: 0, // No days selected
     );
   }
 
-  /// Adds multiple tasks to a list
+  // Adds multiple tasks to a list
   static void addAll(List<Task> existingTasks, List<Task> newTasks) {
     existingTasks.addAll(newTasks);
   }
 
-  /// Adds multiple tasks to a database
+  // Adds multiple tasks to a database
   static Future<void> addAllToDatabase(
       DatabaseHelper dbHelper, List<Task> tasks) async {
     final db = await dbHelper.database;
@@ -106,13 +109,13 @@ class Task {
     }
   }
 
-  /// Clears all tasks from the database
+  // Clears all tasks from the database
   static Future<void> clearAllFromDatabase(DatabaseHelper dbHelper) async {
     final db = await dbHelper.database;
     await db.delete('tasks'); // Assuming 'tasks' is your table name
   }
 
-  /// Creates a copy of the task with updated fields
+  // Creates a copy of the task with updated fields
   Task copyWith({
     int? id,
     String? name,
