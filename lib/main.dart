@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import provider package
 import 'home_page.dart'; // Import the HomePage file
 import 'task_provider.dart'; // Import your ChangeNotifier model class
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
 
    // Initialize sqflite for desktop or testing environments
-  // sqfliteFfiInit();
+  sqfliteFfiInit();
 
   // Set the global database factory to the FFI one
-  // databaseFactory = databaseFactoryFfi;
+  databaseFactory = databaseFactoryFfi;
 
 
   runApp(
