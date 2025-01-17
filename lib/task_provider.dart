@@ -32,13 +32,31 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<Task> tasksForDay(DateTime day) {
-    return _tasks.where((task) => isTaskForDate(task, day)).toList();
-  }
+  Future<List<Task>> tasksForDay(DateTime day) async {
+  final tasks = await DatabaseHelper.instance.getTasksForDate(day);
+  return tasks;
+}
+
+
+
+
 
   bool isTaskForDate(Task task, DateTime day) {
-    final binary = task.selectedDays;
-    final dayIndex = day.weekday % 7; // 0 (Sunday) to 6 (Saturday)
-    return (binary & (1 << dayIndex)) != 0;
+    DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+    DateTime normalizedTaskDate = DateTime(task.startDate.year, task.startDate.month, task.startDate.day);
+
+    int dayIndex = (normalizedDay.weekday - 1) % 7; // Monday = 0, Sunday = 6
+    return Task.binaryToDays(task.selectedDays).contains(dayIndex) &&
+           normalizedTaskDate == normalizedDay;
   }
+
+  Future<void> markTaskCompleted(int? taskId, bool isCompleted, DateTime selectedDay) async {
+  Task task = _tasks.firstWhere((t) => t.id == taskId);
+
+  // Ensure task completion for the selected day
+  await DatabaseHelper.instance.updateTaskCompletionStatus(taskId, selectedDay, isCompleted);
+  
+  notifyListeners();
+}
+
 }

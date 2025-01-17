@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'database_helper.dart';
 
 class DayView extends StatefulWidget {
   final Function(DateTime) onDaySelected;
 
-  DayView({required this.onDaySelected});
+  const DayView({required this.onDaySelected});
 
   @override
   _DayViewState createState() => _DayViewState();
@@ -13,12 +14,13 @@ class DayView extends StatefulWidget {
 class _DayViewState extends State<DayView> {
   final ScrollController _scrollController = ScrollController();
   DateTime _startDate = DateTime.now().subtract(Duration(days: 182)); // 6 months back
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
   late double _itemWidth;
 
   @override
   void initState() {
     super.initState();
+    _selectedDate = _normalizeDate(DateTime.now()); // Normalize the current date
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _centerCurrentDate();
     });
@@ -30,22 +32,27 @@ class _DayViewState extends State<DayView> {
     super.dispose();
   }
 
+  // Normalize a date to remove time components
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
   void _centerCurrentDate() {
     // Calculate the index of the current date
-    final initialIndex = _selectedDate.difference(_startDate).inDays;
+    final initialIndex = _selectedDate.difference(_startDate).inDays + 1;
 
     // Scroll to the position to center the current date
-    final offset = (initialIndex * _itemWidth) - (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
+    final offset =
+        (initialIndex * _itemWidth) - (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
     _scrollController.jumpTo(offset);
-    setState(() {
-      // Ensure the current date is selected
-      _selectedDate = _startDate.add(Duration(days: initialIndex));
-    });
+
+    // Invoke onDaySelected immediately to set the current date as selected
     widget.onDaySelected(_selectedDate);
   }
 
-  void _onDayTap(int index) {
-    final tappedDate = _startDate.add(Duration(days: index));
+  void _onDayTap(int index) async{
+    final tappedDate = _normalizeDate(_startDate.add(Duration(days: index)));
+    await DatabaseHelper.instance.fillTaskCompletionTableForDate(tappedDate);
     setState(() {
       _selectedDate = tappedDate;
     });
@@ -71,8 +78,8 @@ class _DayViewState extends State<DayView> {
         scrollDirection: Axis.horizontal,
         itemCount: 365, // One year of dates
         itemBuilder: (context, index) {
-          final date = _startDate.add(Duration(days: index));
-          final isSelected = date == _selectedDate;
+          final date = _normalizeDate(_startDate.add(Duration(days: index)));
+          final isSelected = date == _selectedDate; // Proper comparison using normalized dates
 
           return GestureDetector(
             onTap: () => _onDayTap(index),

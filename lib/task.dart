@@ -5,7 +5,7 @@ class Task {
   final int? id;
   final String name;
   final String description;
-  final bool completed;
+  bool completed;  // This will be updated dynamically based on task_completion table
   final String priority;
   final DateTime startDate; // DateTime includes both date and time
   final int selectedDays; // Binary representation for days of the week
@@ -14,7 +14,7 @@ class Task {
     this.id,
     required this.name,
     required this.description,
-    required this.completed,
+    this.completed = false,
     required this.priority,
     required this.startDate, // DateTime for both date and time
     required this.selectedDays,
@@ -26,7 +26,6 @@ class Task {
       'id': id,
       'name': name,
       'description': description,
-      'completed': completed ? 1 : 0,
       'priority': priority,
       'startDate': startDate.toIso8601String(), // Save the full DateTime
       'selectedDays': selectedDays,
@@ -39,7 +38,7 @@ class Task {
       id: map['id'],
       name: map['name'],
       description: map['description'],
-      completed: map['completed'] == 1,
+      completed: false,  // This will be set dynamically based on task_completion table
       priority: map['priority'],
       startDate: DateTime.parse(map['startDate']), // Parse the full DateTime
       selectedDays: map['selectedDays'],
@@ -134,5 +133,31 @@ class Task {
       startDate: startDate ?? this.startDate,
       selectedDays: selectedDays ?? this.selectedDays,
     );
+  }
+
+  bool isApplicableToDate(DateTime date) {
+    DateTime normalizedTaskDate = DateTime(startDate.year, startDate.month, startDate.day);
+    int dayIndex = (date.weekday - 1) % 7; // Monday = 0, Sunday = 6
+    return (normalizedTaskDate.compareTo(date) <= 0) &&
+           (selectedDays & (1 << dayIndex)) != 0;
+  }
+
+  // Sets the completion status based on task completion table for the selected date
+  Future<void> setCompletionStatus(DatabaseHelper dbHelper, DateTime selectedDate) async {
+    final db = await dbHelper.database;
+
+    // Query the task completion status from task_completion table
+    final result = await db.query(
+      'task_completion',
+      where: 'taskId = ? AND date = ?',
+      whereArgs: [id, selectedDate.toIso8601String()],
+    );
+
+    // If a record exists, set the completed status accordingly
+    if (result.isNotEmpty) {
+      completed = result.first['isCompleted'] == 1;
+    } else {
+      completed = false;  // Default to false if no completion record found
+    }
   }
 }
