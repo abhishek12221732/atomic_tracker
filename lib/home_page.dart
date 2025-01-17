@@ -9,6 +9,8 @@ import 'task_detail_screen.dart';
 import 'database_helper.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
