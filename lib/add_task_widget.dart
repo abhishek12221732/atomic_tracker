@@ -4,7 +4,7 @@ import 'task_provider.dart';
 import 'task.dart';
 
 class AddTaskWidget extends StatefulWidget {
-  const AddTaskWidget({Key? key}) : super(key: key);
+  const AddTaskWidget({super.key});
 
   @override
   _AddTaskWidgetState createState() => _AddTaskWidgetState();

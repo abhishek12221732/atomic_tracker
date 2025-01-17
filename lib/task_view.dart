@@ -7,7 +7,7 @@ class TaskView extends StatelessWidget {
   final Function(Task) onTaskClicked;
   final Function(Task, bool) onTaskCompleted;
 
-  const TaskView({
+  const TaskView({super.key, 
     required this.tasks,
     required this.onTaskClicked,
     required this.onTaskCompleted,

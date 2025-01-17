@@ -31,7 +31,7 @@ class HabitTrackerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // Remove the debug banner
       title: 'Habit Tracker',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: HomePage(), // Set the HomePage as the initial route

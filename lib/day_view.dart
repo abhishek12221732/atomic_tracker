@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class DayView extends StatefulWidget {
   final Function(DateTime) onDaySelected;
 
-  DayView({required this.onDaySelected});
+  const DayView({super.key, required this.onDaySelected});
 
   @override
   _DayViewState createState() => _DayViewState();
@@ -12,7 +12,7 @@ class DayView extends StatefulWidget {
 
 class _DayViewState extends State<DayView> {
   final ScrollController _scrollController = ScrollController();
-  DateTime _startDate = DateTime.now().subtract(Duration(days: 182)); // 6 months back
+  final DateTime _startDate = DateTime.now().subtract(Duration(days: 182)); // 6 months back
   DateTime _selectedDate = DateTime.now();
   late double _itemWidth;
 
