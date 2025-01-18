@@ -18,13 +18,20 @@ class _DayViewState extends State<DayView> {
   late double _itemWidth;
 
   @override
-  void initState() {
-    super.initState();
-    _selectedDate = _normalizeDate(DateTime.now()); // Normalize the current date
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _centerCurrentDate();
-    });
-  }
+void initState() {
+  super.initState();
+
+  // Normalize the current date
+  _selectedDate = _normalizeDate(DateTime.now());
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Calculate the index of today's date relative to the start date
+    final initialIndex = DateTime.now().difference(_startDate).inDays;
+
+    // Use _onDayTap to handle the initial selection and centering
+    _onDayTap(initialIndex);
+  });
+}
 
   @override
   void dispose() {
@@ -37,39 +44,51 @@ class _DayViewState extends State<DayView> {
     return DateTime(date.year, date.month, date.day);
   }
 
-  void _centerCurrentDate() {
-    // Calculate the index of the current date
-    final initialIndex = _selectedDate.difference(_startDate).inDays + 1;
+//   void _centerCurrentDate() {
+//   // Calculate the index of the current date
+//   final initialIndex = _selectedDate.difference(_startDate).inDays;
 
-    // Scroll to the position to center the current date
-    final offset =
-        (initialIndex * _itemWidth) - (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
-    _scrollController.jumpTo(offset);
+//   // Ensure the scroll position is within valid bounds
+//   final double maxScrollExtent = 365 * _itemWidth; // Adjust for total item count
+//   final double minScrollExtent = 0.0; // Ensure this is a double
 
-    // Invoke onDaySelected immediately to set the current date as selected
-    widget.onDaySelected(_selectedDate);
-  }
+//   // Calculate the target offset
+//   double targetOffset =
+//       (initialIndex * _itemWidth) - (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
 
-  void _onDayTap(int index) async{
-    final tappedDate = _normalizeDate(_startDate.add(Duration(days: index)));
-    await DatabaseHelper.instance.fillTaskCompletionTableForDate(tappedDate);
-    setState(() {
-      _selectedDate = tappedDate;
-    });
-    widget.onDaySelected(_selectedDate);
+//   // Clamp the offset to ensure it stays within bounds
+//   targetOffset = targetOffset.clamp(minScrollExtent, maxScrollExtent);
 
-    // Smoothly center the tapped date
-    final offset = (index * _itemWidth) - (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
-    _scrollController.animateTo(
-      offset,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
+//   // Jump to the calculated offset
+//   _scrollController.jumpTo(targetOffset);
+
+//   // Notify the selected date
+//   widget.onDaySelected(_selectedDate);
+// }
+
+
+
+  void _onDayTap(int index) async {
+  final tappedDate = _normalizeDate(_startDate.add(Duration(days: index)));
+  await DatabaseHelper.instance.fillTaskCompletionTableForDate(tappedDate);
+  setState(() {
+    _selectedDate = tappedDate; // Update the selected date
+  });
+  widget.onDaySelected(_selectedDate); // Notify parent
+
+  // Center the tapped date
+  final offset = (index * _itemWidth) -
+      (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
+
+  _scrollController.jumpTo(offset.clamp(0, _scrollController.position.maxScrollExtent));
+}
+
 
   @override
   Widget build(BuildContext context) {
-    _itemWidth = MediaQuery.of(context).size.width / 7; // Display 7 days at a time
+   _itemWidth = MediaQuery.of(context).size.width > 0
+    ? MediaQuery.of(context).size.width / 7
+    : 50.0; // Fallback width
 
     return SizedBox(
       height: 100,
