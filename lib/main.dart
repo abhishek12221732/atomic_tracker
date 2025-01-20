@@ -7,10 +7,10 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
 
    // Initialize sqflite for desktop or testing environments
-  // sqfliteFfiInit();
+  sqfliteFfiInit();
 
   // Set the global database factory to the FFI one
-  // databaseFactory = databaseFactoryFfi;
+  databaseFactory = databaseFactoryFfi;
 
 
   runApp(

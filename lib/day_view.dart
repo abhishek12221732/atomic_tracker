@@ -80,7 +80,11 @@ void initState() {
   final offset = (index * _itemWidth) -
       (MediaQuery.of(context).size.width / 2 - _itemWidth / 2);
 
-  _scrollController.jumpTo(offset.clamp(0, _scrollController.position.maxScrollExtent));
+  _scrollController.animateTo(
+  offset.clamp(0, _scrollController.position.maxScrollExtent),
+  duration: Duration(milliseconds: 100),
+  curve: Curves.easeOut,
+);
 }
 
 
